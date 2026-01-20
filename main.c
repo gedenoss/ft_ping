@@ -1,8 +1,8 @@
 #include <arpa/inet.h>
 #include <netinet/ip_icmp.h>
+#include <string.h>
 #include <sys/time.h>
 #include <stdio.h>
-#include <string.h>
 #include <unistd.h>
 #include "ping.h"
 
@@ -19,6 +19,7 @@ int main(int argc,char **argv)
     ping.seq = 0;
     ping.transmitted = 0;
     ping.received = 0;
+
 
 ////////////packet
     struct icmphdr pkt;
