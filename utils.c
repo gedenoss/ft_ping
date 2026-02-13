@@ -1,5 +1,5 @@
 #include "ping.h"
-#include <unistd.h>
+
 
 unsigned short checksum(void *b, int len)
 {

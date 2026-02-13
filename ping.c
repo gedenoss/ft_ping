@@ -1,15 +1,5 @@
-#include <arpa/inet.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <sys/time.h>
-#include <netinet/in.h>
-#include <netinet/ip_icmp.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <stdio.h>
 #include "ping.h"
-#include <sys/types.h>
+
 
 
 
