@@ -1,8 +1,26 @@
-#include <stdio.h>
-int main()
-{
-	printf("%ld\n",sizeof(__pid_t));
+// #include <unistd.h>
+// #include <stdio.h>
+// #include <signal.h>
 
-	16 pid = getpid() 32
-	if(pid tu recup (16) == (16)getpid())
-}
+// volatile sig_atomic_t stopp;
+
+// void inthand(int signum) {
+//     stopp = 1;
+// }
+
+// int main(int argc, char **argv) {
+
+//     signal(SIGINT, inthand);
+
+//     while (!stopp)
+//     {
+//         printf("loop\n");
+//         printf("2\n");
+//         sleep(1);
+
+//     }
+
+//     printf("exiting safely\n");
+
+//     return 0;
+// }

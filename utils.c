@@ -20,3 +20,68 @@ unsigned short checksum(void *b, int len)
     result = ~sum;
     return result;
 }
+
+
+void print_stats(t_ping *stats_ping)
+{
+    int lose = 0;
+    printf("--- %s ping statistics ---\n",stats_ping->host);
+
+    lose = ((stats_ping->transmitted - stats_ping->received ) * 100) / stats_ping->transmitted;
+    printf("%d packets transmitted, %d packets recieved, %d%% packet loss\n",
+        stats_ping->transmitted,stats_ping->received,lose);
+    double min = (*stats_ping).msbuffer[0], max = (*stats_ping).msbuffer[0], avg = (*stats_ping).msbuffer[0], stddev = (*stats_ping).msbuffer[0];
+
+    printf("round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n",find_min(min,&stats_ping),find_avg(avg,&stats_ping)
+,find_max(max,&stats_ping),find_stddev(stddev,&stats_ping));
+}
+
+double find_min(double min,t_ping **math_ping)
+{
+    int i = 0;
+    while(i < ((*math_ping)->count))
+    {
+        if(min >= (*math_ping)->msbuffer[i])
+        {
+            min = (*math_ping)->msbuffer[i];
+        }
+        i++;
+    }
+    return min;
+}
+
+double find_max(double max,t_ping **math_ping)
+{
+    int i = 0;
+    while(i <= ((*math_ping)->count))
+    {
+        if(max < (*math_ping)->msbuffer[i])
+            max = (*math_ping)->msbuffer[i];
+        i++;
+    }
+    return max;
+
+}
+
+double find_avg(double avg,t_ping **math_ping)
+{
+    int i = 0;
+    while(i <= ((*math_ping)->count))
+    {
+        avg += (*math_ping)->msbuffer[i];
+        i++;
+    }
+    avg = avg/(*math_ping)->count;
+    return avg;
+}
+
+double find_stddev(double stddev,t_ping **math_ping)
+{
+    (void)*math_ping;
+    return stddev;   
+}
+
+void help()
+{
+    printf("Usage: ping HOST ...\nSend ICMP ECHO_REQUEST packets to network hosts.\n");  
+}
