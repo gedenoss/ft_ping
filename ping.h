@@ -4,6 +4,10 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <signal.h>
+#include <string.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <stdlib.h>
 
 
 typedef struct s_ping
@@ -24,6 +28,7 @@ typedef struct s_ping
 
 
 void pkt_init(t_ping *p_i, struct icmphdr *p_k);
+void ping_init(t_ping *p_init,char *av);
 void send_ping(t_ping *s_p, struct icmphdr *p_k);
 void recv_ping(t_ping *r_p);
 void print_stats(t_ping *stats_ping);

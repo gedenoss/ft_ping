@@ -53,7 +53,7 @@ double find_min(double min,t_ping **math_ping)
 double find_max(double max,t_ping **math_ping)
 {
     int i = 0;
-    while(i <= ((*math_ping)->count))
+    while(i < ((*math_ping)->count))
     {
         if(max < (*math_ping)->msbuffer[i])
             max = (*math_ping)->msbuffer[i];
@@ -66,20 +66,37 @@ double find_max(double max,t_ping **math_ping)
 double find_avg(double avg,t_ping **math_ping)
 {
     int i = 0;
-    while(i <= ((*math_ping)->count))
+    double sum = 0;
+    while(i < ((*math_ping)->count))
     {
-        avg += (*math_ping)->msbuffer[i];
+        sum += (*math_ping)->msbuffer[i];
         i++;
     }
-    avg = avg/(*math_ping)->count;
+    avg = sum/(*math_ping)->count;
     return avg;
 }
 
-double find_stddev(double stddev,t_ping **math_ping)
+double find_stddev(double stddev, t_ping **math_ping)
 {
-    (void)*math_ping;
-    return stddev;   
+    int i = 0;
+    double mean = 0.0;
+    double sumsq = 0.0;
+    int n = (*math_ping)->count;
+
+    if (n <= 1)
+        return 0.0;
+
+    mean = find_avg(0.0, math_ping);
+    while (i < n)
+    {
+        double d = (*math_ping)->msbuffer[i] - mean;
+        sumsq += d * d;
+        i++;
+    }
+    stddev = sumsq / n; // variance
+    return stddev;
 }
+
 
 void help()
 {

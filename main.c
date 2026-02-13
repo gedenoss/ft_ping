@@ -1,16 +1,4 @@
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <netinet/ip_icmp.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/time.h>
-#include <stdio.h>
-#include <unistd.h>
 #include "ping.h"
-#include <signal.h>
-
-
 
 volatile sig_atomic_t stop;
 
@@ -34,17 +22,8 @@ int main(int argc,char **argv)
         help();
         return 1;
     }
-
     t_ping ping;
-    ping.host = argv[1];
-    ping.seq = 0;
-    ping.transmitted = 0;
-    ping.received = 0;
-    ping.sock = 0;
-    ping.msbuffer = NULL;
-    ping.count = 0;
-
-
+    ping_init(&ping,argv[1]);
 
 ////////////packet
     struct icmphdr pkt;

@@ -11,17 +11,7 @@
 #include "ping.h"
 #include <sys/types.h>
 
-void pkt_init(t_ping *p_i, struct icmphdr *p_k)
-{
-    memset(p_k, 0, sizeof(*p_k)); 
-    //creation du packet avec la icmp
-    p_k->type = ICMP_ECHO;
-    p_k->un.echo.id = getpid() & 0xFFFF;
-    p_k->un.echo.sequence = htons(p_i->seq);  // host to network short
-    p_k->checksum = 0;
-    p_k->checksum = checksum(p_k, sizeof(*p_k)); // en vrai raf de la verif
 
-}
 
 void send_ping(t_ping *s_p,struct icmphdr *p_k2)
 {

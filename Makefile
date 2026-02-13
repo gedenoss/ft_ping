@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror
 
-SRC = main.c ping.c utils.c
+SRC = main.c ping.c utils.c init.c
 OBJ = $(SRC:.c=.o)
 NAME = ft_ping
 
