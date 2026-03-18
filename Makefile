@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -std=gnu23
 
 SRC = main.c ping.c utils.c init.c
 OBJ = $(SRC:.c=.o)

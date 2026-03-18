@@ -11,6 +11,8 @@
 #include <errno.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 
 
 typedef struct s_ping
@@ -44,3 +46,4 @@ double find_max(double max,t_ping **math_ping);
 double find_avg(double avg,t_ping **math_ping);
 double find_stddev(double stddev,t_ping **math_ping);
 
+extern volatile sig_atomic_t stop;

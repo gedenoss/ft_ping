@@ -10,20 +10,55 @@ void intHandler(int dummy) {
 
 int main(int argc,char **argv)
 {
+    int verbose = 0;
+    int i = 1;
+    int j = 1;
+    int k = 1;
+    int ip = 1;
     signal(SIGINT, intHandler);
+    
     
     if(argc == 1)
     {
         printf("ping: missing host operand\nTry 'ping --help' or 'ping --usage' for more information.\n");
         return 1;
     }
-    if(strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "--usage") == 0)
+    while(i < argc)
     {
-        help();
-        return 1;
+        if(strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "--usage") == 0)
+        {
+            help();
+            return 1;
+        }
+        i++;
     }
+    while(k < argc)
+    {
+        if(argv[k][0] != '-')
+        {
+            ip = k;
+            break;
+        }
+        if(argv[k][0] == '-' && (argv[k][1] != 'v'))
+        {
+            printf("ping: invalid option -- '%c'\nTry 'ping --help' or 'ping --usage' for more information.\n", argv[k][1]);
+            return 1;
+        }
+        k++;
+    }
+    while(j < argc)
+    {
+        if(strcmp(argv[j], "-v") == 0)
+        {
+            verbose = 1;
+            break;
+        }
+        j++;
+    }
+
     t_ping ping;
-    ping_init(&ping,argv[1]);
+    ping_init(&ping,argv[ip]);
+
 
 ////////////packet
     struct icmphdr pkt;
@@ -36,6 +71,13 @@ int main(int argc,char **argv)
     }
     struct timeval tv = {4, 0};  // 4s
     setsockopt(ping.sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)); //configuere notre socket pour affecter le timeout du recv
+
+
+    //pour creer un ttl expired
+    // int ttl = 1; 
+    // if (setsockopt(ping.sock, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl)) < 0) {
+    //     perror("setsockopt IP_TTL");
+    // }
 
  ///////////converstion char vers struct ip
 
@@ -59,7 +101,17 @@ int main(int argc,char **argv)
     }
 ///////////boucle
     
-    printf("PING %s (%s): 8 data bytes\n",ping.host,inet_ntoa(ping.ip_addr));
+    printf("PING %s (%s): 8 data bytes",ping.host,inet_ntoa(ping.ip_addr));
+    if(verbose == 1)
+    {
+        int id = getpid() & 0xFFFF;
+        printf(", id 0x%04x = %d\n", id, id);
+    }
+    else
+    {
+        printf("\n");
+    }
+
     while (!stop)
     {
         

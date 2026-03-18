@@ -27,9 +27,14 @@ void print_stats(t_ping *stats_ping)
     int lose = 0;
     printf("--- %s ping statistics ---\n",stats_ping->host);
 
-    lose = ((stats_ping->transmitted - stats_ping->received ) * 100) / stats_ping->transmitted;
+    if (stats_ping->transmitted > 0)
+        lose = ((stats_ping->transmitted - stats_ping->received ) * 100) / stats_ping->transmitted;
     printf("%d packets transmitted, %d packets recieved, %d%% packet loss\n",
         stats_ping->transmitted,stats_ping->received,lose);
+
+    if (stats_ping->count == 0 || stats_ping->msbuffer == NULL)
+        return;
+
     double min = (*stats_ping).msbuffer[0], max = (*stats_ping).msbuffer[0], avg = (*stats_ping).msbuffer[0], stddev = (*stats_ping).msbuffer[0];
 
     printf("round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n",find_min(min,&stats_ping),find_avg(avg,&stats_ping)

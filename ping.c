@@ -15,8 +15,8 @@ void send_ping(t_ping *s_p,struct icmphdr *p_k2)
     ssize_t send = sendto(s_p->sock,p_k2,sizeof(*p_k2),0,(struct sockaddr *)&ip,sizeof(ip));
     if(send < 0)
     {
-        perror("send\n");
-        return;
+        perror("ping: sending packet");
+        exit(EXIT_FAILURE);
     }
     else
     {
@@ -30,20 +30,20 @@ void recv_ping(t_ping *r_p)
 
     char buffer[1500];
 
-    while (1) // read until we get a valid echo reply or timeout
+    while (!stop) // read until we get a valid echo reply or timeout
     {
         ssize_t rec = recv(r_p->sock, buffer, 1500, 0); // may receive our own echo request on localhost
 
         if (rec < 0) {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) { // socket timeout reached
-                int seq = r_p->seq - 1; // last sent sequence
-                printf("Request timeout for icmp_seq=%d\n", seq); // match ping output style
-                return;
-            }
+            // if (errno == EAGAIN || errno == EWOULDBLOCK) { // socket timeout reached
+            //     int seq = r_p->seq - 1; // last sent sequence
+            //     printf("Request timeout for icmp_seq=%d\n", seq); // match ping output style
+            //     return;
+            // }
             if (errno == EINTR) {
                 continue;
             }
-            perror("recv");
+            //perror("recv");
             return;
         }
 
@@ -80,12 +80,12 @@ void recv_ping(t_ping *r_p)
         }
         else if(type == 3)
         {
-            fprintf(stderr, "Destination Unreachable\n");
+            fprintf(stderr, "Destination Unreachable\n"); // -v diff
             return;
         }
         else if(type == 11)
         {
-            fprintf(stderr, "Time Exceeded (TTL expired)\n");
+            fprintf(stderr, "Time Exceeded (TTL expired)\n"); // v diff
             return;
         }
     }
