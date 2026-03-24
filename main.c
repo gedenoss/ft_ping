@@ -10,7 +10,7 @@ void intHandler(int dummy) {
 
 int main(int argc,char **argv)
 {
-    int verbose = 0;
+    bool verbose = 0;
     int i = 1;
     int j = 1;
     int k = 1;
@@ -74,10 +74,10 @@ int main(int argc,char **argv)
 
 
     //pour creer un ttl expired
-    // int ttl = 1; 
-    // if (setsockopt(ping.sock, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl)) < 0) {
-    //     perror("setsockopt IP_TTL");
-    // }
+    int ttl = 1; 
+    if (setsockopt(ping.sock, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl)) < 0) {
+        perror("setsockopt IP_TTL");
+    }
 
  ///////////converstion char vers struct ip
 
@@ -119,7 +119,7 @@ int main(int argc,char **argv)
     
         send_ping(&ping,&pkt);
     
-        recv_ping(&ping);
+        recv_ping(verbose,&ping);
         sleep(1);
     }
     //msg de fin

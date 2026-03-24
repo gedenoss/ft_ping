@@ -1,4 +1,5 @@
 #include <netinet/in.h>
+#include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <sys/time.h>
 #include <unistd.h>
@@ -35,7 +36,7 @@ typedef struct s_ping
 void pkt_init(t_ping *p_i, struct icmphdr *p_k);
 void ping_init(t_ping *p_init,char *av);
 void send_ping(t_ping *s_p, struct icmphdr *p_k);
-void recv_ping(t_ping *r_p);
+void recv_ping(bool verbose,t_ping *r_p);
 void print_stats(t_ping *stats_ping);
 void intHandler(int dummy);
 void print_stats(t_ping *stats_ping);

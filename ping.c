@@ -1,6 +1,64 @@
 #include "ping.h"
 
 
+static void dump_ip_icmp_verbose(const char *buffer, ssize_t rec)
+{
+    struct iphdr *ip;
+    int header_len;
+    unsigned short frag;
+    unsigned int flags;
+    unsigned int off;
+    char src[INET_ADDRSTRLEN];
+    char dst[INET_ADDRSTRLEN];
+
+    if (rec < (ssize_t)sizeof(struct iphdr))
+        return;
+    ip = (struct iphdr *)buffer;
+    header_len = ip->ihl * 4;
+    if (rec < header_len)
+        return;
+
+    printf("IP Hdr Dump:\n");
+    for (int i = 0; i + 1 < header_len; i += 2)
+        printf(" %02x%02x", (unsigned char)buffer[i], (unsigned char)buffer[i + 1]);
+    if (header_len % 2 == 1)
+        printf(" %02x00", (unsigned char)buffer[header_len - 1]);
+    printf(" \n");
+
+    frag = ntohs(ip->frag_off);
+    flags = (frag >> 13) & 0x7;
+    off = frag & 0x1FFF;
+    inet_ntop(AF_INET, &ip->saddr, src, sizeof(src));
+    inet_ntop(AF_INET, &ip->daddr, dst, sizeof(dst));
+    printf("Vr HL TOS  Len   ID Flg  off TTL Pro  cks      Src      Dst     Data\n");
+    printf(" %u  %u  %02x %04x %04x   %u %04x  %02x  %02x %04x %-15s %-15s %zu\n",
+        (unsigned int)ip->version,
+        (unsigned int)ip->ihl,
+        (unsigned int)ip->tos,
+        (unsigned int)ntohs(ip->tot_len),
+        (unsigned int)ntohs(ip->id),
+        flags,
+        off,
+        (unsigned int)ip->ttl,
+        (unsigned int)ip->protocol,
+        (unsigned int)ntohs(ip->check),
+        src,
+        dst,
+        (size_t)(rec - header_len));
+
+    if (rec >= header_len + (ssize_t)sizeof(struct icmphdr))
+    {
+        struct icmphdr *icmp = (struct icmphdr *)(buffer + header_len);
+        printf("ICMP: type %u, code %u, size %zu, id 0x%04x, seq 0x%04x\n",
+            (unsigned int)icmp->type,
+            (unsigned int)icmp->code,
+            (size_t)(rec - header_len),
+            (unsigned int)ntohs(icmp->un.echo.id),
+            (unsigned int)ntohs(icmp->un.echo.sequence));
+    }
+}
+
+
 
 
 void send_ping(t_ping *s_p,struct icmphdr *p_k2)
@@ -25,10 +83,11 @@ void send_ping(t_ping *s_p,struct icmphdr *p_k2)
     }
 }
 
-void recv_ping(t_ping *r_p)
+void recv_ping(bool verbose,t_ping *r_p)
 {
 
     char buffer[1500];
+    char sender_ip[INET_ADDRSTRLEN]; // ip routeur qui envoie l erreur
 
     while (!stop) // read until we get a valid echo reply or timeout
     {
@@ -48,6 +107,7 @@ void recv_ping(t_ping *r_p)
         }
 
         int header_len = (buffer[0] & 0x0F) * 4; //buff[0] = 1 byte = 8 octect = 4 oct version(ipv4) + 4 oct ihl (internet header leght) , & 0x0F masque 0000 1111 pour garder suelement ihl * 4 car hil nombre de mot de 32 bit qu on passse en octet exemple 5 mot de 32 bit -> * 4 = 20 oct
+        struct iphdr *ip_hdr = (struct iphdr *)buffer;
         int type = buffer[header_len];
         int id = *(uint16_t *)(buffer + header_len + 4); // *(unit16_t *) lire 16 bit soit 2 oct soit seulement l id qui se situe a l adresse de buffer + header + 4 oct
 
@@ -55,6 +115,9 @@ void recv_ping(t_ping *r_p)
         uint16_t revseq = ntohs(*(uint16_t *)(buffer + header_len + 6));
         int ttl = (unsigned char)buffer[8];
         int bytes = rec - header_len;
+
+        if (inet_ntop(AF_INET, &ip_hdr->saddr, sender_ip, sizeof(sender_ip)) == NULL)
+            snprintf(sender_ip, sizeof(sender_ip), "0.0.0.0");
 
         if (type == 8) { // ignore our own ICMP echo request on loopback de localhost
             continue;
@@ -80,12 +143,31 @@ void recv_ping(t_ping *r_p)
         }
         else if(type == 3)
         {
-            fprintf(stderr, "Destination Unreachable\n"); // -v diff
+           
+            if(verbose == 1)
+            {
+                fprintf(stderr, "%zd bytes from debian13 (%s): Destination Host Unreachable\n",
+                    rec, sender_ip);
+                dump_ip_icmp_verbose(buffer, rec);
+            }
+            else
+                fprintf(stderr, "%zd bytes from debian13 (%s): Destination Host Unreachable\n",
+                    rec, sender_ip);
             return;
         }
         else if(type == 11)
         {
-            fprintf(stderr, "Time Exceeded (TTL expired)\n"); // v diff
+            if(verbose == 1)
+            {
+                fprintf(stderr, "%zd bytes from _gateway (%s): Time to live exceeded\n",
+                    rec, sender_ip); // -v diff
+                dump_ip_icmp_verbose(buffer, rec);
+
+            }
+            else
+                fprintf(stderr, "%zd bytes from _gateway (%s): Time to live exceeded\n",
+                    rec, sender_ip); // -v diff
+            stop = 1;
             return;
         }
     }
